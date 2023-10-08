@@ -99,33 +99,36 @@ place_order_button.grid(row=7, columnspan=2, padx=10, pady=10)
 
 root.mainloop()'''
 
+import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog
 import PyPDF2
 
 def browse_file():
-    file_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+    file_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")], title="Open PDF file")
     if file_path:
-        file_preview_label.text = f"Selected File: {file_path}"
+        file_preview_label.configure(text=f"Selected File: {file_path}")
+        print(file_path)
         display_pdf_content(file_path)
 
 def display_pdf_content(file_path):
     try:
-        pdf_file = open(file_path, "rb")
-        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+        pdf_reader = PyPDF2.PdfReader(file_path)
 
-        num_pages = pdf_reader.numPages
+        num_pages = len(pdf_reader.pages)
         pdf_content = ""
 
         for page_num in range(num_pages):
-            page = pdf_reader.getPage(page_num)
-            pdf_content += page.extractText() + "\n"
+            page = pdf_reader.pages[page_num]
+            pdf_content += page.extract_text() + "\n"
 
-        pdf_file.close()
+        text = pdf_content[40:50]
+        print(text)
+        pdf_content_text.insert("0.0", pdf_content)
 
-        pdf_content_text.text = pdf_content
     except Exception as e:
-        pdf_content_text.text = f"Error reading PDF: {str(e)}"
+        print(e)
+        pdf_content_text.configure(text=f"Error reading PDF: {str(e)}")
 
 def place_order_and_print():
     stop_notes = stop_notes_entry.text
@@ -139,9 +142,13 @@ def place_order_and_print():
     print(f"Delivery Option: {delivery_option}")
 
 app = ctk.CTk()
-app.title("Automate Your Order")
+app.title("Sierra Pharmacy Order Automation")
 app.geometry("600x600")
+app.maxsize(width=600, height=600)
+app.minsize(width=600, height=600)
+app.grid_columnconfigure((0,1), weight=1)
 app.resizable(height=False, width=False)
+app._set_appearance_mode("dark")
 
 # Create a title label centered in the window
 title_label = ctk.CTkLabel(app, text="Automate Your Order", font=("Helvetica", 26))
@@ -169,13 +176,12 @@ delivery_option_menu = ctk.CTkOptionMenu(app, values=delivery_options, corner_ra
 delivery_option_menu.grid(row=3, column=1, padx=10, pady=5, sticky='w')
 
 browse_button = ctk.CTkButton(app, text="Browse File", command=browse_file, corner_radius=5)
-browse_button.grid(row=4, column=1, padx=10, pady=5)
+browse_button.grid(row=4, columnspan=2, padx=10, pady=5)
 
 file_preview_label = ctk.CTkLabel(app, text="Selected File: None")
-file_preview_label.grid(row=5, column=1, padx=10, pady=5)
+file_preview_label.grid(row=5, columnspan=2, padx=10, pady=5)
 
-pdf_name = ""
-pdf_content_text = ctk.CTkLabel(app, text=pdf_name, height=10, width=40)
+pdf_content_text = ctk.CTkTextbox(app, height=300, width=500, corner_radius=5)
 pdf_content_text.grid(row=6, columnspan=2, padx=10, pady=5)
 
 place_order_button = ctk.CTkButton(app, text="Place order and print", command=place_order_and_print, corner_radius=5)
