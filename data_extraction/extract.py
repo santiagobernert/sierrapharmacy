@@ -1,100 +1,61 @@
 import re
-import PyPDF2
-
-def get_data(file_path):
-    data = {
-        "Name": "PEREZ, FLORA", 
-        "Sex": "F", 
-        "Phone": "(909) 701-8832",
-        "Street Address":" 9338 LOMITA DR", 
-        "Apartment": "APT B", "Cell": "000-0000",
-        "Addr2": "",
-        "City": "Rancho Cucamonga",
-        "State": "CA", 
-        "Zip": "91701",
-        "E-Mail": ""
-        }
-    try:
-        pdf_reader = PyPDF2.PdfReader(file_path)
-
-        num_pages = len(pdf_reader.pages)
-        pdf_content = ""
-
-        for page_num in range(num_pages):
-            page = pdf_reader.pages[page_num]
-            pdf_content += page.extract_text() + "\n"
-
-        text = '\n'.join(pdf_content.splitlines()[2:-2])
-
-        name = text.find("Patient")
-        sex = text.find()
-        phone = text.find()
-        street_address = text.find()
-        apartment = text.find()
-        addr2 = text.find()
-        city = text.find()
-        state = text.find()
-        zip = text.find()
-        e_mail = text.find()
-
-        return text
-
-    except Exception as e:
-        print(e)
 
 def find_in_text(text):
-    patron_name = r"Patient ([A-Z\s,]+)"
-    patron_sex = r"Sex ([A-Z])"
-    patron_phone = r"Phone \((\d{3})\) (\d{3}-\d{4})"
-    patron_cell = r"Cell (\d{3}-\d{4})"
-    patron_address = r"Address (\d+ [A-Z\s]+)"
-    patron_apartment = r"APT ([a-zA-Z])"
-    patron_addr2 = r"Addr2 (\d+ [A-Z\s]+)"
-    patron_city = r"City ([a-zA-Z\s,]+)"
-    patron_state = r"State ([A-Z]+)"
-    patron_zip_code = r"Zip (\d+)"
-    patron_email = r"E-Mail (\S+)"
+    name_pattern = r"Patient ([A-Z\s,]+)"
+    sex_pattern = r"Sex ([A-Z])"
+    phone_pattern = r"Phone \((\d{3})\) (\d{3}-\d{4})"
+    cell_pattern = r"Cell \((\d{3})\) (\d{3}-\d{4})"
+    address_pattern = r"Address (\d+ [A-Z\s]+)"
+    apartment_pattern = r"APT ([A-Z0-9]+)"
+    addr2_pattern = r"Addr2 (\d+ [A-Z\s]+)"
+    city_pattern = r"City ([A-Za-z]+ [A-Za-z]+)"
+    state_pattern = r"State ([A-Z]+)"
+    zip_code_pattern = r"Zip (\d+)"
+    email_pattern = r"E-Mail ([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})"
 
-    # Buscar coincidencias en el texto usando expresiones regulares
-    resultado_name = re.search(patron_name, text)
-    resultado_sex = re.search(patron_sex, text)
-    resultado_phone = re.search(patron_phone, text)
-    resultado_cell = re.search(patron_cell, text)
-    resultado_address = re.search(patron_address, text)
-    resultado_apartment = re.search(patron_apartment, text)
-    resultado_addr2 = re.search(patron_addr2, text)
-    resultado_city = re.search(patron_city, text)
-    resultado_state = re.search(patron_state, text)
-    resultado_zip_code = re.search(patron_zip_code, text)
-    resultado_email = re.search(patron_email, text)
+    search_name = re.search(name_pattern, text)
+    search_sex = re.search(sex_pattern, text)
+    search_phone = re.search(phone_pattern, text)
+    search_cell = re.search(cell_pattern, text)
+    search_address = re.search(address_pattern, text)
+    search_apartment = re.search(apartment_pattern, text)
+    search_addr2 = re.search(addr2_pattern, text)
+    search_city = re.search(city_pattern, text)
+    search_state = re.search(state_pattern, text)
+    search_zip_code = re.search(zip_code_pattern, text)
+    search_email = re.search(email_pattern, text)
 
-    # Crear un diccionario con los datos extraídos
-    dat = {
-        "name": resultado_name.group(1).strip()[:-1],
-        "sex": resultado_sex.group(1),
-        "phone": f"({resultado_phone.group(1)}) {resultado_phone.group(2)}",
-        "cell": resultado_cell.group(1),
-        "address": resultado_address.group(1).strip(),
-        "apartment": resultado_apartment.group(1).strip() if resultado_apartment else "",
-        "addr2": resultado_addr2.group(1).strip() if resultado_addr2 else "",
-        "city": resultado_city.group(1).strip()[:-13],
-        "state": resultado_state.group(1),
-        "zip code": resultado_zip_code.group(1),
-        "e_mail": resultado_email.group(1)
+    data = {
+        "Name": search_name.group(1).strip()[:-2] if search_name.group(1).strip().endswith(" S") else search_name.group(1).strip(),
+        "Sex": search_sex.group(1),
+        "Phone": f"({search_phone.group(1)}) {search_phone.group(2)}",
+        "Cell": f"({search_cell.group(1)}) {search_cell.group(2)}" if search_cell else "",
+        "Address": search_address.group(1).strip().split(' APT')[0] if 'APT' in search_address.group(1).strip() else search_address.group(1).strip(),
+        "Apartment": search_apartment.group(1).strip() if search_apartment else "",
+        "Addr2": search_addr2.group(1).strip() if search_addr2 else "",
+        "City": search_city.group(1).strip().split(" DOB")[0],
+        "State": search_state.group(1),
+        "Zip code": search_zip_code.group(1),
+        "E-mail": search_email.group(1) if search_email else ""
     }
 
-    # Imprimir el diccionario resultante
-    print(dat)
+    print(data)
+    return data
 
 
 
 text = '''
-Patient PEREZ, FLORA Sex F Phone (909) 701-8832
-Address 9338 LOMITA DR APT B Cell 000-0000
-Addr2 
-City Rancho Cucamonga
-State CA Zip 91701 
-E-Mail gring@gmail.com
+Patient HADDAD, RANIA Sex F Phone (626) 628-7594
+Address 7980 MAYTEN AVE #1036 Cell (626) 628-7594
+Addr2 FC Fax 000-0000
+City Rancho Cucamonga DOB 04/12/1990 33 Wgt Hgt
+State CA Zip 91730 Marital Status Residence Code 1
+Ship To Pregnant? N Lactating?
+E-Mail Cash ICD-10
+HOH Disc
+Employer Use Safety Caps Y Language English
+SSN 215764173 CA Lic As of 07/10/18 HIPAA Sig on file
+MBI Other Coverage 0 TPPDefault Plans PPW
 '''
-find_in_text(text)
+#find_in_text(text)
 
