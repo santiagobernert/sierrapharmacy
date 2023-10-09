@@ -22,6 +22,7 @@ def display_pdf_content(file_path):
             pdf_content += page.extract_text() + "\n"
 
         text = '\n'.join(pdf_content.splitlines()[2:-2])
+        print(text)
         pdf_content_text.insert("0.0", text)
 
     except Exception as e:
