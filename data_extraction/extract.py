@@ -6,7 +6,7 @@ def find_in_text(text):
     phone_pattern = r"Phone \((\d{3})\) (\d{3}-\d{4})"
     cell_pattern = r"Cell \((\d{3})\) (\d{3}-\d{4})"
     address_pattern = r"Address (\d+ [A-Z\s]+)"
-    apartment_pattern = r"APT ([A-Z0-9]+)"
+    apartment_pattern = r"(?:APT |#)([A-Z0-9]+)"
     addr2_pattern = r"Addr2 (\d+ [A-Z\s]+)"
     city_pattern = r"City ([A-Za-z]+ [A-Za-z]+)"
     state_pattern = r"State ([A-Z]+)"
@@ -26,20 +26,18 @@ def find_in_text(text):
     search_email = re.search(email_pattern, text)
 
     data = {
-        "Name": search_name.group(1).strip()[:-2] if search_name.group(1).strip().endswith(" S") else search_name.group(1).strip(),
-        "Sex": search_sex.group(1),
-        "Phone": f"({search_phone.group(1)}) {search_phone.group(2)}",
-        "Cell": f"({search_cell.group(1)}) {search_cell.group(2)}" if search_cell else "",
-        "Address": search_address.group(1).strip().split(' APT')[0] if 'APT' in search_address.group(1).strip() else search_address.group(1).strip(),
-        "Apartment": search_apartment.group(1).strip() if search_apartment else "",
-        "Addr2": search_addr2.group(1).strip() if search_addr2 else "",
-        "City": search_city.group(1).strip().split(" DOB")[0],
-        "State": search_state.group(1),
-        "Zip code": search_zip_code.group(1),
-        "E-mail": search_email.group(1) if search_email else ""
+        "name": search_name.group(1).strip()[:-2] if search_name.group(1).strip().endswith(" S") else search_name.group(1).strip(),
+        "sex": search_sex.group(1),
+        "phone": f"({search_phone.group(1)}) {search_phone.group(2)}",
+        "cell": f"({search_cell.group(1)}) {search_cell.group(2)}" if search_cell else "",
+        "address": search_address.group(1).strip().split(' APT')[0] if 'APT' in search_address.group(1).strip() else search_address.group(1).strip()[:-2] if search_address.group(1).strip().endswith(' C') else search_address.group(1).strip(),
+        "apartment": f"#{search_apartment.group(1).strip()}" if search_apartment else '',
+        "addr2": search_addr2.group(1).strip() if search_addr2 else "",
+        "city": search_city.group(1).strip().split(" DOB")[0],
+        "state": search_state.group(1),
+        "zip_code": search_zip_code.group(1),
+        "e_mail": search_email.group(1) if search_email else ""
     }
-
-    print(data)
     return data
 
 

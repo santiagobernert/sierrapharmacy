@@ -1,5 +1,6 @@
 from data_extraction.extract import find_in_text
-from interface.interface import run
+from interface.interface import App
+from webautomation.automation import place_order
 
-app = run(find_in_text)
-app.mainloop()
+app = App(find_in_text, place_order)
+app.run()
